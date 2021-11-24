@@ -10,8 +10,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.release>11</maven.compiler.release>
-		<javafx.version>15</javafx.version>
-		<javafx.maven.plugin.version>0.0.6</javafx.maven.plugin.version>
+		<javafx.version>17.0.2-ea+1</javafx.version>
+		<javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
 		<openjdk.nashorn.version>15.3</openjdk.nashorn.version>
 	</properties>
 	<build>
@@ -87,6 +87,7 @@
 
 							<artifactSet>
 								<excludes>
+									<exclude>org.openjfx:javafx-*:mac-aarch64</exclude>
 									<exclude>org.openjfx:javafx-*:mac</exclude>
 									<exclude>org.openjfx:javafx-*:linux</exclude>
 								</excludes>
@@ -94,7 +95,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>shade-javafx-mac</id>
+						<id>shade-javafx-mac-intel</id>
 						<phase>package</phase>
 						<goals>
 							<goal>shade</goal>
@@ -102,7 +103,7 @@
 
 						<configuration>
 							<shadedArtifactAttached>true</shadedArtifactAttached>
-							<shadedClassifierName>with-javafx-mac</shadedClassifierName>
+							<shadedClassifierName>with-javafx-mac-intel</shadedClassifierName>
 							<transformers>
 								<transformer implementation=
 													 "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
@@ -113,6 +114,33 @@
 							<artifactSet>
 								<excludes>
 									<exclude>org.openjfx:javafx-*:win</exclude>
+									<exclude>org.openjfx:javafx-*:mac-aarch64</exclude>
+									<exclude>org.openjfx:javafx-*:linux</exclude>
+								</excludes>
+							</artifactSet>
+						</configuration>
+					</execution>
+					<execution>
+						<id>shade-javafx-mac-aarch64</id>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+
+						<configuration>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<shadedClassifierName>with-javafx-mac-aarch64</shadedClassifierName>
+							<transformers>
+								<transformer implementation=
+													 "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>com.lilithsthrone.main.Launcher</mainClass>
+								</transformer>
+							</transformers>
+
+							<artifactSet>
+								<excludes>
+									<exclude>org.openjfx:javafx-*:win</exclude>
+									<exclude>org.openjfx:javafx-*:mac</exclude>
 									<exclude>org.openjfx:javafx-*:linux</exclude>
 								</excludes>
 							</artifactSet>
@@ -139,6 +167,7 @@
 								<excludes>
 									<exclude>org.openjfx:javafx-*:win</exclude>
 									<exclude>org.openjfx:javafx-*:mac</exclude>
+									<exclude>org.openjfx:javafx-*:mac-aarch64</exclude>
 								</excludes>
 							</artifactSet>
 						</configuration>
