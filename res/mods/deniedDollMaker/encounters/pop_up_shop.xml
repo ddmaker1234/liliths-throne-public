@@ -6,7 +6,7 @@
 
     <possibleEncounters>
         <encounter>
-            <name>pop up shop</name>
+            <name>Pop Up Shop</name>
 
             <!-- High for testing -->
             <chanceToTrigger opportunisticEncounter="true">15</chanceToTrigger>
