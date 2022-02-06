@@ -10,7 +10,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.release>11</maven.compiler.release>
-		<javafx.version>17.0.2-ea+1</javafx.version>
+		<javafx.version>17.0.2</javafx.version>
 		<javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
 		<openjdk.nashorn.version>15.3</openjdk.nashorn.version>
 	</properties>
