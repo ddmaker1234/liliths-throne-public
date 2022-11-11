@@ -1,19 +1,66 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.lilithsthrone</groupId>
-	<artifactId>game</artifactId>
+	<groupId>innoxia</groupId>
+	<artifactId>lilithsthrone</artifactId>
 	<packaging>jar</packaging>
-	<version>1</version>
-	<name>lilithsthrone</name>
+	<version>0.4.6.3</version>
+	<name>Lilith's Throne</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.release>11</maven.compiler.release>
-		<javafx.version>17.0.2</javafx.version>
+		<maven.compiler.release>17</maven.compiler.release>
+		<javafx.version>18.0.2</javafx.version>
+		<nashorn.version>15.4</nashorn.version>
 		<javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
-		<openjdk.nashorn.version>15.3</openjdk.nashorn.version>
+		<maven-shade-plugin.version>3.3.0</maven-shade-plugin.version>
+		<maven-compile-plugin.version>3.10.1</maven-compile-plugin.version>
+		<target.platform>linux</target.platform>
+		<exclude.platform>win</exclude.platform>
 	</properties>
+	<dependencies>
+
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-base</artifactId>
+			<version>${javafx.version}</version>
+			<classifier>${target.platform}</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-fxml</artifactId>
+			<version>${javafx.version}</version>
+			<classifier>${target.platform}</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-web</artifactId>
+			<version>${javafx.version}</version>
+			<classifier>${target.platform}</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-graphics</artifactId>
+			<version>${javafx.version}</version>
+			<classifier>${target.platform}</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+			<version>${javafx.version}</version>
+			<classifier>${target.platform}</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-media</artifactId>
+			<version>${javafx.version}</version>
+			<classifier>${target.platform}</classifier>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openjdk.nashorn</groupId>
+			<artifactId>nashorn-core</artifactId>
+			<version>${nashorn.version}</version>
+		</dependency>
+	</dependencies>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
@@ -23,29 +70,16 @@
 			</resource>
 			<resource>
 				<directory>res</directory>
-				<targetPath>${project.build.directory}/res</targetPath>
+				<targetPath>${project.build.directory}/${project.name} (${target.platform})/res</targetPath>
 			</resource>
 		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.0.2</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>com.lilithsthrone.main.Launcher</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
+				<version>${maven-compile-plugin.version}</version>
 				<configuration>
-					<source>${maven.compiler.release}</source>
-					<target>${maven.compiler.release}</target>
-					<useIncrementalCompilation>false</useIncrementalCompilation>
+					<release>${maven.compiler.release}</release>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -56,279 +90,34 @@
 					<mainClass>com.lilithsthrone.main.Main</mainClass>
 				</configuration>
 			</plugin>
-
-			<!-- See this section of the OpenJFX doc -->
-			<!-- https://openjfx.io/openjfx-docs/modular#Non-Mod -->
-			<!-- It creates 3 JARs (one per OS) with the JavaFX libraries built-in, inflating it from about 23 MB to 60 MB per JAR. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.0</version>
-				<dependencies>
-
-				</dependencies>
+				<version>${maven-shade-plugin.version}</version>
 				<executions>
 					<execution>
-						<id>shade-javafx-win</id>
 						<phase>package</phase>
 						<goals>
 							<goal>shade</goal>
 						</goals>
-						
 						<configuration>
 							<shadedArtifactAttached>true</shadedArtifactAttached>
-							<shadedClassifierName>with-javafx-win</shadedClassifierName>
+							<shadedClassifierName>project-classifier</shadedClassifierName>
+							<outputFile>${project.build.directory}/${project.name} (${target.platform})/${project.name}-${project.version}.jar</outputFile>
 							<transformers>
-								<transformer implementation=
-													 "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>com.lilithsthrone.main.Launcher</mainClass>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>com.lilithsthrone.Launcher</mainClass>
 								</transformer>
 							</transformers>
-
 							<artifactSet>
 								<excludes>
-									<exclude>org.openjfx:javafx-*:mac-aarch64</exclude>
-									<exclude>org.openjfx:javafx-*:mac</exclude>
-									<exclude>org.openjfx:javafx-*:linux</exclude>
+								  <exclude>org.openjfx:*:${exclude.platform}</exclude>
 								</excludes>
-							</artifactSet>
-						</configuration>
-					</execution>
-					<execution>
-						<id>shade-javafx-mac-intel</id>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-
-						<configuration>
-							<shadedArtifactAttached>true</shadedArtifactAttached>
-							<shadedClassifierName>with-javafx-mac-intel</shadedClassifierName>
-							<transformers>
-								<transformer implementation=
-													 "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>com.lilithsthrone.main.Launcher</mainClass>
-								</transformer>
-							</transformers>
-
-							<artifactSet>
-								<excludes>
-									<exclude>org.openjfx:javafx-*:win</exclude>
-									<exclude>org.openjfx:javafx-*:mac-aarch64</exclude>
-									<exclude>org.openjfx:javafx-*:linux</exclude>
-								</excludes>
-							</artifactSet>
-						</configuration>
-					</execution>
-					<execution>
-						<id>shade-javafx-mac-aarch64</id>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-
-						<configuration>
-							<shadedArtifactAttached>true</shadedArtifactAttached>
-							<shadedClassifierName>with-javafx-mac-aarch64</shadedClassifierName>
-							<transformers>
-								<transformer implementation=
-													 "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>com.lilithsthrone.main.Launcher</mainClass>
-								</transformer>
-							</transformers>
-
-							<artifactSet>
-								<excludes>
-									<exclude>org.openjfx:javafx-*:win</exclude>
-									<exclude>org.openjfx:javafx-*:mac</exclude>
-									<exclude>org.openjfx:javafx-*:linux</exclude>
-								</excludes>
-							</artifactSet>
-						</configuration>
-					</execution>
-					<execution>
-						<id>shade-javafx-linux</id>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-
-						<configuration>
-							<shadedArtifactAttached>true</shadedArtifactAttached>
-							<shadedClassifierName>with-javafx-linux</shadedClassifierName>
-							<transformers>
-								<transformer implementation=
-													 "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>com.lilithsthrone.main.Launcher</mainClass>
-								</transformer>
-							</transformers>
-
-							<artifactSet>
-								<excludes>
-									<exclude>org.openjfx:javafx-*:win</exclude>
-									<exclude>org.openjfx:javafx-*:mac</exclude>
-									<exclude>org.openjfx:javafx-*:mac-aarch64</exclude>
-								</excludes>
-							</artifactSet>
+							  </artifactSet>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
 		</plugins>
 	</build>
-	<dependencies>
-		<dependency>
-			<groupId>org.openjdk.nashorn</groupId>
-			<artifactId>nashorn-core</artifactId>
-			<version>${openjdk.nashorn.version}</version>
-		</dependency>
-
-		<!-- JavaFX -->
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-controls</artifactId>
-			<version>${javafx.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-fxml</artifactId>
-			<version>${javafx.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-web</artifactId>
-			<version>${javafx.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-swing</artifactId>
-			<version>${javafx.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-base</artifactId>
-			<version>${javafx.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-graphics</artifactId>
-			<version>${javafx.version}</version>
-		</dependency>
-
-		<!-- All the JavaFX stuff below is needed so compiling the JAR doesn't specifically compile it for your OS only. -->
-
-		<!-- Windows-specific JavaFX dependencies -->
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-controls</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>win</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-fxml</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>win</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-web</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>win</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-swing</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>win</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-base</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>win</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-graphics</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>win</classifier>
-		</dependency>
-
-		<!-- Mac-specific JavaFX dependencies -->
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-controls</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>mac</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-fxml</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>mac</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-web</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>mac</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-swing</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>mac</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-base</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>mac</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-graphics</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>mac</classifier>
-		</dependency>
-
-		<!-- Linux-specific JavaFX dependencies -->
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-controls</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>linux</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-fxml</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>linux</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-web</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>linux</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-swing</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>linux</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-base</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>linux</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-graphics</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>linux</classifier>
-		</dependency>
-	</dependencies>
 </project>
