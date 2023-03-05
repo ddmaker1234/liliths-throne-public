@@ -35,7 +35,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import com.lilithsthrone.game.character.*;
-import com.lilithsthrone.game.character.npc.misc.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -144,6 +143,20 @@ import com.lilithsthrone.game.character.npc.fields.Vronti;
 import com.lilithsthrone.game.character.npc.fields.Wynter;
 import com.lilithsthrone.game.character.npc.fields.Yui;
 import com.lilithsthrone.game.character.npc.fields.Ziva;
+import com.lilithsthrone.game.character.npc.misc.ClubberImport;
+import com.lilithsthrone.game.character.npc.misc.Elemental;
+import com.lilithsthrone.game.character.npc.misc.GenericAndrogynousNPC;
+import com.lilithsthrone.game.character.npc.misc.GenericFemaleNPC;
+import com.lilithsthrone.game.character.npc.misc.GenericMaleNPC;
+import com.lilithsthrone.game.character.npc.misc.GenericSexualPartner;
+import com.lilithsthrone.game.character.npc.misc.GenericTrader;
+import com.lilithsthrone.game.character.npc.misc.LodgerImport;
+import com.lilithsthrone.game.character.npc.misc.ModdedCharacter;
+import com.lilithsthrone.game.character.npc.misc.NPCOffspring;
+import com.lilithsthrone.game.character.npc.misc.OffspringSeed;
+import com.lilithsthrone.game.character.npc.misc.PrologueFemale;
+import com.lilithsthrone.game.character.npc.misc.PrologueMale;
+import com.lilithsthrone.game.character.npc.misc.SlaveImport;
 import com.lilithsthrone.game.character.npc.submission.Axel;
 import com.lilithsthrone.game.character.npc.submission.Claire;
 import com.lilithsthrone.game.character.npc.submission.DarkSiren;
@@ -168,6 +181,7 @@ import com.lilithsthrone.game.character.npc.submission.Takahashi;
 import com.lilithsthrone.game.character.npc.submission.Vengar;
 import com.lilithsthrone.game.character.persona.Occupation;
 import com.lilithsthrone.game.character.persona.SexualOrientation;
+import com.lilithsthrone.game.character.pregnancy.Litter;
 import com.lilithsthrone.game.character.quests.Quest;
 import com.lilithsthrone.game.character.quests.QuestLine;
 import com.lilithsthrone.game.character.race.Race;
@@ -238,6 +252,7 @@ import com.lilithsthrone.game.settings.KeyCodeWithModifiers;
 import com.lilithsthrone.game.settings.KeyboardAction;
 import com.lilithsthrone.game.sex.SexAreaOrifice;
 import com.lilithsthrone.game.sex.SexType;
+import com.lilithsthrone.game.sex.managers.universal.SMGeneric;
 import com.lilithsthrone.game.sex.sexActions.SexActionType;
 import com.lilithsthrone.main.Main;
 import com.lilithsthrone.rendering.SVGImages;
@@ -497,7 +512,8 @@ public class Game implements XMLSaving {
 						CharacterImportSetting.CLEAR_KEY_ITEMS,
 						CharacterImportSetting.CLEAR_COMBAT_HISTORY,
 						CharacterImportSetting.CLEAR_SEX_HISTORY,
-						CharacterImportSetting.REMOVE_RACE_CONCEALED);
+						CharacterImportSetting.REMOVE_RACE_CONCEALED,
+						CharacterImportSetting.CLEAR_FAMILY_ID);
 				try {
 					if(((Element)((Element)((Element)characterElement.getElementsByTagName("character").item(0)).getElementsByTagName("core").item(0)).getElementsByTagName("id").item(0)).getAttribute("value").equals("PlayerCharacter")) {
 						importedSlave.setBirthday(importedSlave.getBirthday().plusYears(18)); // If the imported character is a player character, they need to have their age adjusted to fit with the fact that NPCs start at age 18
@@ -579,7 +595,8 @@ public class Game implements XMLSaving {
 						CharacterImportSetting.CLEAR_KEY_ITEMS,
 						CharacterImportSetting.CLEAR_COMBAT_HISTORY,
 						CharacterImportSetting.CLEAR_SEX_HISTORY,
-						CharacterImportSetting.REMOVE_RACE_CONCEALED);
+						CharacterImportSetting.REMOVE_RACE_CONCEALED,
+						CharacterImportSetting.CLEAR_FAMILY_ID);
 				try {
 					if(((Element)((Element)((Element)characterElement.getElementsByTagName("character").item(0)).getElementsByTagName("core").item(0)).getElementsByTagName("id").item(0)).getAttribute("value").equals("PlayerCharacter")) {
 						importedLodger.setBirthday(importedLodger.getBirthday().plusYears(18)); // If the imported character is a player character, they need to have their age adjusted to fit with the fact that NPCs start at age 18
@@ -623,7 +640,8 @@ public class Game implements XMLSaving {
 						CharacterImportSetting.CLEAR_KEY_ITEMS,
 						CharacterImportSetting.CLEAR_COMBAT_HISTORY,
 						CharacterImportSetting.CLEAR_SEX_HISTORY,
-						CharacterImportSetting.REMOVE_RACE_CONCEALED);
+						CharacterImportSetting.REMOVE_RACE_CONCEALED,
+						CharacterImportSetting.CLEAR_FAMILY_ID);
 				try {
 					if(((Element)((Element)((Element)characterElement.getElementsByTagName("character").item(0)).getElementsByTagName("core").item(0)).getElementsByTagName("id").item(0)).getAttribute("value").equals("PlayerCharacter")) {
 						importedClubber.setBirthday(importedClubber.getBirthday().plusYears(18)); // If the imported character is a player character, they need to have their age adjusted to fit with the fact that NPCs start at age 18
@@ -1154,6 +1172,15 @@ public class Game implements XMLSaving {
 					}
 				}
 				
+				if(Main.isVersionOlderThan(loadingVersion, "0.4.7.2")) {
+					// Add shaft tile:
+					Vector2i vec = Main.game.getWorlds().get(WorldType.BAT_CAVERNS).getCell(PlaceType.BAT_CAVERN_SLIME_QUEEN_LAIR).getLocation();
+					vec.setY(vec.getY()-3);
+					Main.game.getWorlds().get(WorldType.BAT_CAVERNS).getCell(vec).getPlace().setPlaceType(PlaceType.BAT_CAVERN_SHAFT);
+					Main.game.getWorlds().get(WorldType.BAT_CAVERNS).getCell(vec).getPlace().setName(PlaceType.BAT_CAVERN_SHAFT.getName());
+
+				}
+
 				if(debug) {
 					System.out.println("Maps finished: "+ (System.nanoTime()-time)/1000000000d);
 				}
@@ -1880,7 +1907,14 @@ public class Game implements XMLSaving {
 				if(Main.isVersionOlderThan(loadingVersion, "0.4.6.6") && Main.game.getPlayer().getTrueRace()==Race.DEMON) {
 					Main.game.getDialogueFlags().setFlag("innoxia_child_of_lyssieth", true); // Players could only become a demon via Lyssieth before v0.4.6.6, so set the flag to represent this
 				}
-				
+
+				if(Main.isVersionOlderThan(Game.loadingVersion, "0.4.7.2")) {
+					Main.game.getNpc(Lunexis.class).setAffection(Main.game.getPlayer(), -100);
+					Main.game.getNpc(Lunexis.class).setAffection(Main.game.getNpc(DarkSiren.class), -100);
+					Main.game.getNpc(Lunexis.class).setAffection(Main.game.getNpc(Aurokaris.class), -100);
+					Main.game.getNpc(Lunexis.class).setAffection(Main.game.getNpc(Ursa.class), -100);
+				}
+
 				if(debug) {
 					System.out.println("New NPCs finished");
 					System.out.println("All finished");
@@ -2342,7 +2376,7 @@ public class Game implements XMLSaving {
 			// Headless horseman:
 			
 			if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(HeadlessHorseman.class))) { addNPC(new HeadlessHorseman(), false); addedNpcs.add(HeadlessHorseman.class); }
-
+			
 			// Themiscyra:
 			
 			if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Lunexis.class))) { addNPC(new Lunexis(), false); addedNpcs.add(Lunexis.class); }
@@ -2352,7 +2386,7 @@ public class Game implements XMLSaving {
 			// Load characters from Mods
       //
 			npcLoader.loadModNPC(this);
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -2459,7 +2493,7 @@ public class Game implements XMLSaving {
 			for(int i=1; i <= hoursPassed; i++) {
 				Main.game.getPlayer().performHourlyFluidsCheck();
 				occupancyUtil.performHourlyUpdate(this.getDayNumber((startHour*60*60) + (i*60)), (hourStartTo24+i)%24);
-				for(String slaveId : Main.game.getPlayer().getSlavesOwned()) { // Update slaves' status effects per hour to give them a chance to refill fluids and such.
+				for(String slaveId : occupancyUtil.getAllCharacters()) { // Update slaves' status effects per hour to give them a chance to refill fluids and such.
 					try {
 						Main.game.getNPCById(slaveId).calculateStatusEffects(3600);
 					} catch (Exception e) {
@@ -4568,7 +4602,12 @@ public class Game implements XMLSaving {
 	public DayPeriod getCurrentDayPeriod() {
 		return DateAndTime.getDayPeriod(this.getDateNow(), Game.DOMINION_LATITUDE, Game.DOMINION_LONGITUDE);
 	}
-	
+
+	public DayPeriod getDayPeriodAtHour(int hourOfDay) {
+		LocalDateTime ldt = this.getDateNow().withHour(hourOfDay);
+		return DateAndTime.getDayPeriod(ldt, Game.DOMINION_LATITUDE, Game.DOMINION_LONGITUDE);
+	}
+
 	public boolean isMorning() {
 		return getMinutesPassed() % (24 * 60) >= 0 && getMinutesPassed() % (24 * 60) < (60 * 12);
 	}
@@ -4869,6 +4908,13 @@ public class Game implements XMLSaving {
 				npc.removeSlave(c);
 			}
 		}
+
+		for(NPC loopNpc : Main.game.getAllNPCs()) {
+			loopNpc.setAllAreasKnownByCharacter(npc, false);
+			loopNpc.setAffection(npc, 0f);
+		}
+
+		//TODO Why are the unique checks necessary?
 		// Use separate loops so that we only check if the banished npc isUnique once
 		if(npc.isUnique()) {
 			for(NPC loopNpc : Main.game.getAllNPCs()) {
@@ -4877,7 +4923,7 @@ public class Game implements XMLSaving {
 		} else {
 			for(NPC loopNpc : Main.game.getAllNPCs()) {
 				loopNpc.setAllAreasKnownByCharacter(npc, false);
-				if(loopNpc.isUnique()) {
+				if(!loopNpc.isUnique()) {
 					loopNpc.setAffection(npc, 0f);
 				}
 			}
@@ -5840,4 +5886,23 @@ public class Game implements XMLSaving {
 		}
 	}
 	
+	// For use in debug menu:
+
+	public void startGenericSex(GameCharacter character) {
+//		Main.game.setContent(new Response("", "", Main.game.getDefaultDialogue(false)));
+		Main.game.setContent(
+				new ResponseSex(UtilText.parse(character, "Sex with [npc.name]"),
+					UtilText.parse(character, "Start a generic sex scene with [npc.name]"),
+					true,
+					true,
+					new SMGeneric(
+							Util.newArrayListOfValues(Main.game.getPlayer()),
+							Util.newArrayListOfValues(character),
+					null,
+					null),
+					Main.game.getDefaultDialogue(false),
+					"<p>"
+						+ UtilText.parse(character, "You start having sex with [npc.name]")
+					+ "</p>"));
+	}
 }
